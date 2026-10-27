@@ -17,7 +17,15 @@ DB=berealty
 PASS=0
 FAIL=0
 
-run()   { $MYSQL --batch --skip-column-names "$DB" -e "$1" 2>&1; }
+# The client prints "Using a password on the command line interface can be insecure"
+# whenever -p<password> is used. Drop that line so it is not compared as a result.
+run() {
+    local out rc
+    out=$($MYSQL --batch --skip-column-names "$DB" -e "$1" 2>&1)
+    rc=$?
+    grep -v 'Using a password on the command line' <<<"$out"
+    return $rc
+}
 ok()    { PASS=$((PASS + 1)); printf '  \033[32mPASS\033[0m  %s\n' "$1"; }
 bad()   { FAIL=$((FAIL + 1)); printf '  \033[31mFAIL\033[0m  %s\n        %s\n' "$1" "$2"; }
 
