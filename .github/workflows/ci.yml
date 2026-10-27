@@ -26,5 +26,6 @@ jobs:
         run: python3 scripts/generate_sample_data.py | diff - sql/02_sample_data.sql
       - name: Run the test suite
         env:
-          MYSQL: mysql -h 127.0.0.1 -P 3306 -uroot -pberealty
+          MYSQL_PWD: berealty
+          MYSQL: mysql -h 127.0.0.1 -P 3306 -uroot
         run: bash tests/run_tests.sh
