@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: berealty
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pberealty"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the sample data is up to date with the generator
+        run: python3 scripts/generate_sample_data.py | diff - sql/02_sample_data.sql
+      - name: Run the test suite
+        env:
+          MYSQL: mysql -h 127.0.0.1 -P 3306 -uroot -pberealty
+        run: bash tests/run_tests.sh
